@@ -49,7 +49,5 @@ export default function ProtectedLayout({ children }) {
         );
     }
 
-    // if (isLoading) return null;
-
     return children;
 }

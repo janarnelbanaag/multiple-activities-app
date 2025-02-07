@@ -15,6 +15,10 @@ export default function TodosPage() {
 
     const router = useRouter();
 
+    useEffect(() => {
+        fetchTodos();
+    }, []);
+
     const fetchTodos = async () => {
         setLoading(true);
 

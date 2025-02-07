@@ -31,8 +31,6 @@ export default function Signup() {
                 });
 
             if (authError) {
-                console.log("err");
-                console.log(authError);
                 throw new Error(authError.message);
             }
 
