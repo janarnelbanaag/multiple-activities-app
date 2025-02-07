@@ -17,7 +17,6 @@ export async function POST(request) {
 
     const { user_id, photo_name, file } = await request.json();
 
-    // Ensure the user_id matches the authenticated user
     if (user.id !== user_id) {
         return new Response(JSON.stringify({ error: "User mismatch" }), {
             status: 403,
@@ -26,33 +25,45 @@ export async function POST(request) {
     }
 
     try {
-        // const fileBuffer = Buffer.from(file, "base64");
-        // const filePath = `photos/${Date.now()}_${photo_name}`;
+        const fileBuffer = Buffer.from(file, "base64");
+        const filePath = `photos/${user.id}/${Date.now()}_${photo_name}`;
 
-        // const { data: storageData, error: storageError } =
-        //     await supabase.storage
-        //         .from("photos")
-        //         .upload(filePath, fileBuffer, { contentType: "image/jpeg" });
+        const { error: storageError } = await supabase.storage
+            .from("photos")
+            .upload(filePath, fileBuffer, { contentType: "image/jpeg" });
 
-        // if (storageError) {
-        //     return new Response(
-        //         JSON.stringify({ error: storageError.message }),
-        //         {
-        //             status: 400,
-        //             headers: { "Content-Type": "application/json" },
-        //         }
-        //     );
-        // }
+        if (storageError) {
+            return new Response(
+                JSON.stringify({ error: storageError.message }),
+                {
+                    status: 400,
+                    headers: { "Content-Type": "application/json" },
+                }
+            );
+        }
 
-        // const fileUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${storageData.path}`;
+        const { data: signedUrlData, error: signedUrlError } =
+            await supabase.storage
+                .from("photos")
+                .createSignedUrl(filePath, 60 * 60);
+
+        if (signedUrlError) {
+            return new Response(
+                JSON.stringify({ error: signedUrlError.message }),
+                {
+                    status: 400,
+                    headers: { "Content-Type": "application/json" },
+                }
+            );
+        }
 
         const { data: photoData, error: dbError } = await supabase
             .from("photos")
             .insert([
                 {
-                    user_id: user.id,
-                    photo_url: "test",
-                    photo_name: photo_name,
+                    user_id,
+                    photo_url: filePath,
+                    photo_name,
                 },
             ])
             .select();

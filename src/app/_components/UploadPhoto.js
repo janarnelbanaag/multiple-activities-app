@@ -3,12 +3,11 @@
 import { useEffect, useState } from "react";
 import { createClient } from "../../../utils/supabase/client";
 
-export default function UploadPhoto({ user_id, onUploadSuccess }) {
+export default function UploadPhoto({ token, onUploadSuccess }) {
     const [photoName, setPhotoName] = useState("");
     const [file, setFile] = useState(null);
     const [loading, setLoading] = useState(false);
     const [userId, setUserId] = useState(null);
-    const [token, setToken] = useState(null);
 
     const supabase = createClient();
 
@@ -23,26 +22,6 @@ export default function UploadPhoto({ user_id, onUploadSuccess }) {
                 console.error("Error fetching user:", error);
             } else {
                 setUserId(user?.id || null);
-                const { data: session } = await supabase.auth.getSession();
-                setToken(session?.session?.access_token || null);
-            }
-
-            const { data: photoData, error: dbError } = await supabase
-                .from("photos")
-                .insert([
-                    {
-                        user_id: user.id,
-                        photo_url: "test",
-                        photo_name: "photo_name",
-                    },
-                ])
-                .select();
-
-            if (dbError) {
-                return new Response(JSON.stringify({ error: "ahuhu" }), {
-                    status: 400,
-                    headers: { "Content-Type": "application/json" },
-                });
             }
         };
 
@@ -71,17 +50,13 @@ export default function UploadPhoto({ user_id, onUploadSuccess }) {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
                     },
                     body: JSON.stringify({
                         user_id: userId,
                         photo_name: photoName,
                         file: base64String,
                     }),
-                    credentials: "include",
                 });
-
-                console.log(response);
 
                 if (!response.ok) {
                     const errorText = await response.text();
