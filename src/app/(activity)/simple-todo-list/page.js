@@ -4,32 +4,16 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "../../../../utils/supabase/client";
 import { useAuth } from "@/app/_context/AuthContext";
+import HeaderComponent from "@/app/_components/HeaderComponent";
 
 export default function TodosPage() {
-    const { supabase, user, userData, handleLogout } = useAuth();
+    const { supabase, user, handleLogout } = useAuth();
 
     const [todos, setTodos] = useState([]);
     const [task, setTask] = useState("");
     const [loading, setLoading] = useState(true);
 
     const router = useRouter();
-
-    console.log(userData);
-
-    useEffect(() => {
-        const getSession = async () => {
-            const {
-                data: { session },
-            } = await supabase.auth.getSession();
-
-            if (!session) {
-                router.push("/");
-            } else {
-                fetchTodos();
-            }
-        };
-        getSession();
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const fetchTodos = async () => {
         setLoading(true);
@@ -98,24 +82,12 @@ export default function TodosPage() {
     return (
         <div className="min-h-screen bg-gray-50 p-4">
             <div className="max-w-2xl mx-auto bg-white p-6 rounded shadow">
-                <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-2xl font-bold">My To-Do List</h1>
-                    <div>
-                        <button
-                            onClick={handleHome}
-                            className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 mr-2"
-                        >
-                            Home
-                        </button>
-                        <button
-                            onClick={handleLogout}
-                            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                        >
-                            Logout
-                        </button>
-                    </div>
-                </div>
-                <form onSubmit={addTodo} className="mb-4 flex">
+                <HeaderComponent
+                    title="My To-Do List"
+                    handleLogout={handleLogout}
+                />
+
+                <form onSubmit={addTodo} className="mt-6 mb-4 flex">
                     <input
                         type="text"
                         placeholder="Enter a new task"

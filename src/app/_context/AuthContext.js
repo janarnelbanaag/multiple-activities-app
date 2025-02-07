@@ -12,7 +12,7 @@ export function AuthProvider({ children }) {
     const router = useRouter();
 
     const [user, setUser] = useState(null);
-    const [userData, setUserData] = useState(null);
+    const [session, setSession] = useState(null);
     const [authMode, setAuthMode] = useState("login");
     const [loading, setLoading] = useState(true);
     const [successMessage, setSuccessMessage] = useState("");
@@ -24,6 +24,10 @@ export function AuthProvider({ children }) {
             const { data } = await supabase.auth.getSession();
             if (data?.session?.user) {
                 setUser(data.session.user);
+                setSession(data.session);
+            } else {
+                setUser(null);
+                setSession(null);
             }
             setLoading(false);
         };
@@ -33,24 +37,17 @@ export function AuthProvider({ children }) {
     }, []); // eslint-disable-line
 
     useEffect(() => {
-        const fetchTodos = async () => {
-            setLoading(true);
-
-            const { data, error } = await supabase
-                .from("todos")
-                .select("*")
-                .order("created_at", { ascending: true });
-            if (error) {
-                console.error("Error fetching todos:", error);
+        const resetSession = async () => {
+            const { data } = await supabase.auth.getSession();
+            if (data?.session) {
+                setSession(data.session);
             } else {
-                setUserData((uData) => ({ ...uData, todos: data }));
+                setSession(null);
             }
-
-            setLoading(false);
         };
+    }, [user]); // eslint-disable-line
 
-        if (user) fetchTodos();
-    }, [user, supabase]);
+    console.log(session);
 
     const handleLogout = async () => {
         await supabase.auth.signOut();
@@ -81,8 +78,8 @@ export function AuthProvider({ children }) {
                 supabase,
                 user,
                 setUser,
-                userData,
-                setUserData,
+                session,
+                setSession,
                 authMode,
                 setAuthMode,
                 loading,

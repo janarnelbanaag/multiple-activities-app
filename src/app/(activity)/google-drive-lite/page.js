@@ -6,6 +6,8 @@ import SearchPhotos from "@/app/_components/SearchPhoto";
 import SortPhotos from "@/app/_components/SortPhotos";
 import UploadPhoto from "@/app/_components/UploadPhoto";
 import { createClient } from "../../../../utils/supabase/client";
+import HeaderComponent from "@/app/_components/HeaderComponent";
+import { useAuth } from "@/app/_context/AuthContext";
 
 export default function GoogleDriveLitePage() {
     const [searchQuery, setSearchQuery] = useState("");
@@ -14,6 +16,7 @@ export default function GoogleDriveLitePage() {
     const [token, setToken] = useState(null);
 
     const supabase = createClient();
+    const { session, handleLogout } = useAuth();
 
     useEffect(() => {
         const fetchToken = async () => {
@@ -117,54 +120,68 @@ export default function GoogleDriveLitePage() {
     };
 
     return (
-        <div className="p-8">
-            <UploadPhoto token={token} onUploadSuccess={fetchPhotos} />
+        <div className="p-8 bg-gray-100">
+            <div className="w-auto bg-gray-50 rounded shadow p-6">
+                <div className="mb-6">
+                    <HeaderComponent
+                        title="Google Drive Lite"
+                        handleLogout={handleLogout}
+                    />
+                </div>
+                <UploadPhoto
+                    token={token}
+                    onUploadSuccess={fetchPhotos}
+                    category="photos"
+                />
 
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-4 bg-white shadow rounded-lg mb-8">
-                <SearchPhotos onSearch={setSearchQuery} />
-                <SortPhotos onSort={setSortValue} />
-            </div>
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-4 bg-white shadow rounded-lg mb-8">
+                    <SearchPhotos onSearch={setSearchQuery} />
+                    <SortPhotos onSort={setSortValue} />
+                </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-8 gap-4">
-                {photos.length > 0 ? (
-                    photos.map((photo) => (
-                        <div
-                            key={photo.id}
-                            className="border p-4 rounded shadow"
-                        >
-                            {/* eslint-disable-next-line */}
-                            <img
-                                src={photo.photo_url}
-                                alt={photo.photo_name}
-                                className="w-full h-40 object-contain rounded"
-                            />
-                            <h2 className="text-lg font-semibold mt-2">
-                                {photo.photo_name}
-                            </h2>
-                            <p className="text-sm text-gray-500">
-                                {new Date(photo.created_at).toLocaleString()}
-                            </p>
-                            <div className="flex justify-between mt-2">
-                                <button
-                                    className="text-blue-500 hover:underline"
-                                    onClick={() => handleUpdate(photo.id)}
-                                >
-                                    Update
-                                </button>
-                                <button
-                                    className="text-red-500 hover:underline"
-                                    onClick={() => handleDelete(photo.id)}
-                                >
-                                    Delete
-                                </button>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-8 gap-4">
+                    {photos.length > 0 ? (
+                        photos.map((photo) => (
+                            <div
+                                key={photo.id}
+                                className="border p-4 rounded shadow"
+                            >
+                                {/* eslint-disable-next-line */}
+                                <img
+                                    src={photo.photo_url}
+                                    alt={photo.photo_name}
+                                    className="w-full h-40 object-contain rounded"
+                                />
+                                <h2 className="text-lg font-semibold mt-2">
+                                    {photo.photo_name}
+                                </h2>
+                                <p className="text-sm text-gray-500">
+                                    {new Date(
+                                        photo.created_at
+                                    ).toLocaleString()}
+                                </p>
+                                <div className="flex justify-between mt-2">
+                                    <button
+                                        className="text-blue-500 hover:underline"
+                                        onClick={() => handleUpdate(photo.id)}
+                                    >
+                                        Update
+                                    </button>
+                                    <button
+                                        className="text-red-500 hover:underline"
+                                        onClick={() => handleDelete(photo.id)}
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    ))
-                ) : (
-                    <p className="col-span-full text-center text-gray-600">
-                        No photos found.
-                    </p>
-                )}
+                        ))
+                    ) : (
+                        <p className="col-span-full text-center text-gray-600">
+                            No photos found.
+                        </p>
+                    )}
+                </div>
             </div>
         </div>
     );

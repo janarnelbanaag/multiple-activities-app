@@ -15,7 +15,7 @@ export async function POST(request) {
         });
     }
 
-    const { user_id, photo_name, file } = await request.json();
+    const { user_id, name, photo_name, file, category } = await request.json();
 
     if (user.id !== user_id) {
         return new Response(JSON.stringify({ error: "User mismatch" }), {
@@ -26,7 +26,7 @@ export async function POST(request) {
 
     try {
         const fileBuffer = Buffer.from(file, "base64");
-        const filePath = `photos/${user.id}/${Date.now()}_${photo_name}`;
+        const filePath = `${category}/${user.id}/${Date.now()}_${photo_name}`;
 
         const { error: storageError } = await supabase.storage
             .from("photos")
@@ -42,23 +42,8 @@ export async function POST(request) {
             );
         }
 
-        const { data: signedUrlData, error: signedUrlError } =
-            await supabase.storage
-                .from("photos")
-                .createSignedUrl(filePath, 60 * 60);
-
-        if (signedUrlError) {
-            return new Response(
-                JSON.stringify({ error: signedUrlError.message }),
-                {
-                    status: 400,
-                    headers: { "Content-Type": "application/json" },
-                }
-            );
-        }
-
         const { data: photoData, error: dbError } = await supabase
-            .from("photos")
+            .from(category)
             .insert([
                 {
                     user_id,

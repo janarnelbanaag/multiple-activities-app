@@ -22,7 +22,6 @@ export default function Signup() {
         setLoading(true);
         setErrorMessage("");
         setSuccessMessage("");
-        console.log("triggered");
 
         try {
             const { data: authData, error: authError } =

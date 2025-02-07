@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "../../../utils/supabase/client";
 
-export default function UploadPhoto({ token, onUploadSuccess }) {
+export default function UploadPhoto({ token, onUploadSuccess, category }) {
     const [photoName, setPhotoName] = useState("");
     const [file, setFile] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -55,6 +55,7 @@ export default function UploadPhoto({ token, onUploadSuccess }) {
                         user_id: userId,
                         photo_name: photoName,
                         file: base64String,
+                        category,
                     }),
                 });
 
