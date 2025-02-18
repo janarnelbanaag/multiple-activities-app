@@ -17,7 +17,7 @@ export default function TodosPage() {
 
     useEffect(() => {
         fetchTodos();
-    }, []);
+    }, []); // eslint-disable-line
 
     const fetchTodos = async () => {
         setLoading(true);
