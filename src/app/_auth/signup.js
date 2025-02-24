@@ -22,7 +22,6 @@ export default function Signup() {
         setLoading(true);
         setErrorMessage("");
         setSuccessMessage("");
-        console.log("triggered");
 
         try {
             const { data: authData, error: authError } =
@@ -32,8 +31,6 @@ export default function Signup() {
                 });
 
             if (authError) {
-                console.log("err");
-                console.log(authError);
                 throw new Error(authError.message);
             }
 

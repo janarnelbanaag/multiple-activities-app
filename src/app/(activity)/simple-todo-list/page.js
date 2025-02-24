@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "../../../../utils/supabase/client";
 import { useAuth } from "@/app/_context/AuthContext";
+import HeaderComponent from "@/app/_components/HeaderComponent";
 
 export default function TodosPage() {
-    const { supabase, user, userData, handleLogout } = useAuth();
+    const { supabase, user, handleLogout } = useAuth();
 
     const [todos, setTodos] = useState([]);
     const [task, setTask] = useState("");
@@ -14,22 +15,9 @@ export default function TodosPage() {
 
     const router = useRouter();
 
-    console.log(userData);
-
     useEffect(() => {
-        const getSession = async () => {
-            const {
-                data: { session },
-            } = await supabase.auth.getSession();
-
-            if (!session) {
-                router.push("/");
-            } else {
-                fetchTodos();
-            }
-        };
-        getSession();
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+        fetchTodos();
+    }, []); // eslint-disable-line
 
     const fetchTodos = async () => {
         setLoading(true);
@@ -96,79 +84,60 @@ export default function TodosPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 p-4">
-            <div className="max-w-2xl mx-auto bg-white p-6 rounded shadow">
-                <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-2xl font-bold">My To-Do List</h1>
-                    <div>
-                        <button
-                            onClick={handleHome}
-                            className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 mr-2"
+        <div className="mx-auto bg-white p-6 rounded shadow">
+            <form onSubmit={addTodo} className="mt-6 mb-4 flex">
+                <input
+                    type="text"
+                    placeholder="Enter a new task"
+                    className="flex-grow border rounded-l px-3 py-2"
+                    value={task}
+                    onChange={(e) => setTask(e.target.value)}
+                />
+                <button
+                    type="submit"
+                    className="bg-blue-500 text-white px-4 py-2 rounded-r hover:bg-blue-600"
+                >
+                    Add
+                </button>
+            </form>
+            {loading ? (
+                <p>Loading todos...</p>
+            ) : todos.length ? (
+                <ul>
+                    {todos.map((todo) => (
+                        <li
+                            key={todo.id}
+                            className="flex items-center justify-between border-b py-2"
                         >
-                            Home
-                        </button>
-                        <button
-                            onClick={handleLogout}
-                            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                        >
-                            Logout
-                        </button>
-                    </div>
-                </div>
-                <form onSubmit={addTodo} className="mb-4 flex">
-                    <input
-                        type="text"
-                        placeholder="Enter a new task"
-                        className="flex-grow border rounded-l px-3 py-2"
-                        value={task}
-                        onChange={(e) => setTask(e.target.value)}
-                    />
-                    <button
-                        type="submit"
-                        className="bg-blue-500 text-white px-4 py-2 rounded-r hover:bg-blue-600"
-                    >
-                        Add
-                    </button>
-                </form>
-                {loading ? (
-                    <p>Loading todos...</p>
-                ) : todos.length ? (
-                    <ul>
-                        {todos.map((todo) => (
-                            <li
-                                key={todo.id}
-                                className="flex items-center justify-between border-b py-2"
-                            >
-                                <div className="flex items-center">
-                                    <input
-                                        type="checkbox"
-                                        checked={todo.is_complete}
-                                        onChange={() => toggleComplete(todo)}
-                                        className="mr-2"
-                                    />
-                                    <span
-                                        className={
-                                            todo.is_complete
-                                                ? "line-through text-gray-500"
-                                                : ""
-                                        }
-                                    >
-                                        {todo.task}
-                                    </span>
-                                </div>
-                                <button
-                                    onClick={() => deleteTodo(todo.id)}
-                                    className="text-red-500 hover:text-red-700"
+                            <div className="flex items-center">
+                                <input
+                                    type="checkbox"
+                                    checked={todo.is_complete}
+                                    onChange={() => toggleComplete(todo)}
+                                    className="mr-2"
+                                />
+                                <span
+                                    className={
+                                        todo.is_complete
+                                            ? "line-through text-gray-500"
+                                            : ""
+                                    }
                                 >
-                                    Delete
-                                </button>
-                            </li>
-                        ))}
-                    </ul>
-                ) : (
-                    <p>No todos yet. Add one!</p>
-                )}
-            </div>
+                                    {todo.task}
+                                </span>
+                            </div>
+                            <button
+                                onClick={() => deleteTodo(todo.id)}
+                                className="text-red-500 hover:text-red-700"
+                            >
+                                Delete
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+            ) : (
+                <p>No todos yet. Add one!</p>
+            )}
         </div>
     );
 }

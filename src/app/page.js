@@ -7,23 +7,8 @@ import Link from "next/link";
 import DelLogoutBtn from "./_components/DelLogoutBtn";
 
 export default function Home() {
-    const {
-        user,
-        userData,
-        authMode,
-        setAuthMode,
-        loading,
-        handleLogout,
-        handleDeleteAccount,
-    } = useAuth();
-
-    if (loading) {
-        return (
-            <div className="flex justify-center items-center h-screen text-lg font-semibold">
-                Loading...
-            </div>
-        );
-    }
+    const { user, authMode, setAuthMode, handleLogout, handleDeleteAccount } =
+        useAuth();
 
     const activities = [
         { href: "/simple-todo-list", label: "Simple Todo List" },
@@ -47,7 +32,7 @@ export default function Home() {
             ) : (
                 <div className="text-center">
                     <h2 className="text-3xl font-bold mb-4 text-gray-700">
-                        Welcome, {userData?.name}
+                        Welcome!
                     </h2>
                     <p className="text-lg text-gray-600 mb-6">
                         Here are different activities for you:
