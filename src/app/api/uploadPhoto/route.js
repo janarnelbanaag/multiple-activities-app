@@ -42,15 +42,18 @@ export async function POST(request) {
             );
         }
 
+        const data = {
+            photo_url: filePath,
+            photo_name,
+        };
+
+        if (category == "photos") {
+            data.user_id = user_id;
+        }
+
         const { data: photoData, error: dbError } = await supabase
             .from(category)
-            .insert([
-                {
-                    user_id,
-                    photo_url: filePath,
-                    photo_name,
-                },
-            ])
+            .insert([data])
             .select();
 
         if (dbError) {

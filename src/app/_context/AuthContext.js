@@ -47,8 +47,6 @@ export function AuthProvider({ children }) {
         };
     }, [user]); // eslint-disable-line
 
-    console.log(session);
-
     const handleLogout = async () => {
         await supabase.auth.signOut();
         setErrorMessage("");

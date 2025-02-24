@@ -1,51 +1,54 @@
 "use client";
 
-import HeaderComponent from "@/app/_components/HeaderComponent";
-import ReviewForm from "@/app/_components/ReviewForm";
-import ReviewList from "@/app/_components/ReviewList";
-import UploadPhoto from "@/app/_components/UploadPhoto";
 import { useAuth } from "@/app/_context/AuthContext";
-import { useState } from "react";
+import { useData } from "@/app/_context/DataContext";
+import Link from "next/link";
 
 export default function FoodPage() {
-    const [token, setToken] = useState(null);
-
     const { handleLogout } = useAuth();
-    // const { data: photo } = await supabase
-    //     .from("food_photos")
-    //     .select("*")
-    //     .eq("id", params.id)
-    //     .single();
+    const { path, fetchPhotos, photos, setReviewPhoto, loading } = useData();
 
-    // if (!photo) return <p>Photo not found</p>;
+    if (loading) {
+        return <>Fetching Photos...</>;
+    }
 
     return (
-        <div className="min-h-screen bg-gray-100 p-8">
-            <div className="w-auto mx-auto py-4 rounded shadow bg-gray-50">
-                <div className="m-6">
-                    <HeaderComponent
-                        title="Food Review App"
-                        handleLogout={handleLogout}
-                    />
-                </div>
-                <UploadPhoto
-                    token={token}
-                    onUploadSuccess={fetchPhotos}
-                    category="photos"
-                />
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-8 gap-4">
-                    {/* <img
-                        src={photo.photo_url}
-                        alt={photo.name}
-                        className="w-full h-64 object-cover"
-                    /> */}
-                    <div className="border p-4 rounded shadow">
-                        <h1 className="text-2xl">test</h1>
-                        <ReviewForm />
-                        <ReviewList />
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-8 gap-4">
+            {photos.length > 0 ? (
+                photos.map((photo) => (
+                    <div key={photo.id} className="border p-4 rounded shadow">
+                        {/* eslint-disable-next-line */}
+                        <img
+                            src={photo.photo_url}
+                            alt={photo.photo_name}
+                            className="w-full h-40 object-contain rounded"
+                        />
+                        <h2 className="text-lg font-semibold mt-2">
+                            {photo.photo_name}
+                        </h2>
+                        <p className="text-sm text-gray-500">
+                            {new Date(photo.created_at).toLocaleString()}
+                        </p>
+                        <div className="flex justify-between mt-4 ">
+                            <Link
+                                className="text-blue-500 hover:underline ml-auto"
+                                onClick={() =>
+                                    setReviewPhoto(() =>
+                                        photos.find((p) => p.id === photo.id)
+                                    )
+                                }
+                                href={`${path}/${photo.id}`}
+                            >
+                                See Reviews
+                            </Link>
+                        </div>
                     </div>
-                </div>
-            </div>
+                ))
+            ) : (
+                <p className="col-span-full text-center text-gray-600">
+                    No photos found.
+                </p>
+            )}
         </div>
     );
 }

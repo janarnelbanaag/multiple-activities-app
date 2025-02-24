@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createClient } from "../../../utils/supabase/client";
 
-export default function UploadPhoto({ token, onUploadSuccess, category }) {
+export default function UploadPhoto({ onUploadSuccess, category }) {
     const [photoName, setPhotoName] = useState("");
     const [file, setFile] = useState(null);
     const [loading, setLoading] = useState(false);
     const [userId, setUserId] = useState(null);
+
+    const fileInputRef = useRef(null);
 
     const supabase = createClient();
 
@@ -67,6 +69,7 @@ export default function UploadPhoto({ token, onUploadSuccess, category }) {
                 const data = await response.json();
                 alert("Photo uploaded successfully!");
                 setPhotoName("");
+                fileInputRef.current.value = "";
                 setFile(null);
                 if (onUploadSuccess) onUploadSuccess();
             } catch (error) {
@@ -92,6 +95,7 @@ export default function UploadPhoto({ token, onUploadSuccess, category }) {
             />
             <input
                 type="file"
+                ref={fileInputRef}
                 onChange={handleFileChange}
                 className="p-2 border rounded-lg"
             />

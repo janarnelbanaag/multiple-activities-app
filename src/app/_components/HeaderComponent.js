@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import React from "react";
 
-const HeaderComponent = ({ title, handleLogout }) => {
+const HeaderComponent = ({ title, redBtnLbl = "Logout", handleLogout }) => {
     const router = useRouter();
 
     const handleHome = () => {
@@ -24,7 +24,7 @@ const HeaderComponent = ({ title, handleLogout }) => {
                     onClick={handleLogout}
                     className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
                 >
-                    Logout
+                    {redBtnLbl}
                 </button>
             </div>
         </div>

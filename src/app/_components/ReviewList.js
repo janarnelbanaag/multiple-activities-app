@@ -1,21 +1,82 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "../_context/AuthContext";
 
-export default function ReviewList({ photoId }) {
-    const [reviews, setReviews] = useState([]);
+export default function ReviewList({ reviews, photoId, getRevs }) {
+    const { user } = useAuth();
 
-    useEffect(() => {
-        fetch(`/api/getReviews?photo_id=${photoId}`)
-            .then((res) => res.json())
-            .then((data) => setReviews(data));
-    }, [photoId]);
+    const handleDelete = async (reviewId) => {
+        try {
+            const res = await fetch(`/api/reviews?review_id=${reviewId}`, {
+                method: "DELETE",
+            });
+
+            if (!res.ok) {
+                console.error("Failed to delete review");
+                return;
+            }
+
+            getRevs();
+        } catch (error) {
+            console.error("Error deleting review:", error);
+        }
+    };
+
+    const handleUpdate = async (reviewId, newReviewText) => {
+        try {
+            const res = await fetch(`/api/reviews?review_id=${reviewId}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ review: newReviewText }),
+            });
+
+            if (!res.ok) {
+                console.error("Failed to update review");
+                return;
+            }
+
+            getRevs();
+        } catch (error) {
+            console.error("Error updating review:", error);
+        }
+    };
 
     return (
         <div>
-            <h3 className="font-bold">Reviews</h3>
             {reviews.map((review) => (
-                <p key={review.id} className="border p-2">
-                    {review.review}
-                </p>
+                <div
+                    key={review.id}
+                    className="border rounded-lg p-4 mb-4 shadow-md bg-white"
+                >
+                    <p className="text-gray-800 leading-relaxed">
+                        {review.review}
+                    </p>
+                    {user.id === review.user_id && (
+                        <div className="mt-2 flex justify-end space-x-2">
+                            <button
+                                onClick={() => handleDelete(review.id)}
+                                className="bg-red-500 hover:bg-red-700 text-white py-1 px-3 rounded focus:outline-none focus:shadow-outline"
+                            >
+                                Delete
+                            </button>
+                            <button
+                                onClick={() => {
+                                    const newReview = prompt(
+                                        "Enter new review text:",
+                                        review.review
+                                    );
+                                    if (newReview) {
+                                        handleUpdate(review.id, newReview);
+                                    }
+                                }}
+                                className="bg-blue-500 hover:bg-blue-700 text-white py-1 px-3 rounded focus:outline-none focus:shadow-outline"
+                            >
+                                Update
+                            </button>
+                        </div>
+                    )}
+                </div>
             ))}
         </div>
     );

@@ -1,6 +1,6 @@
 import { createClient } from "../../../../utils/supabase/server";
 
-export async function GET(req) {
+export async function GET(request) {
     const supabase = await createClient();
 
     const {
@@ -15,16 +15,24 @@ export async function GET(req) {
         });
     }
 
-    const { search = "", sort = "created_at" } = Object.fromEntries(
-        new URL(req.url).searchParams
-    );
+    const {
+        search = "",
+        sort = "created_at",
+        category = "photos",
+        id = "",
+    } = Object.fromEntries(new URL(request.url).searchParams);
 
-    const { data, error } = await supabase
-        .from("photos")
-        .select("*")
-        .ilike("photo_name", `%${search}%`)
-        .eq("user_id", user.id)
-        .order(sort, { ascending: true });
+    let query = supabase.from(category).select("*");
+
+    if (category == "photos") {
+        query = query.ilike("photo_name", `%${search}%`).eq("user_id", user.id);
+    }
+
+    if (id) {
+        query = query.eq("id", id);
+    }
+
+    const { data, error } = await query.order(sort, { ascending: true });
 
     if (error) {
         return new Response(JSON.stringify({ error: error.message }), {
