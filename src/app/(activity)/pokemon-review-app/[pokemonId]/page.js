@@ -3,19 +3,16 @@
 import HeaderComponent from "@/app/_components/HeaderComponent";
 import ReviewForm from "@/app/_components/ReviewForm";
 import ReviewList from "@/app/_components/ReviewList";
-import { useData } from "@/app/_context/DataContext";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 const Reviews = () => {
 	const [reviews, setReviews] = useState([]);
-	const [fetchedPhoto, setFetchedPhoto] = useState(null);
+	const [fetchedPokemon, setFetchedPokemon] = useState(null);
 
 	const router = useRouter();
 	const params = useParams();
 	const pokemonId = params.pokemonId;
-
-	const { reviewPhoto } = useData();
 
 	const getRevs = useCallback(
 		() =>
@@ -28,19 +25,17 @@ const Reviews = () => {
 	useEffect(() => {
 		const fetchPhotos = async () => {
 			const response = await fetch(
-				`/api/fetchPhotos?id=${photoId}&category=food_photos`
+				`https://pokeapi.co/api/v2/pokemon/${pokemonId}`
 			);
 			if (!response.ok) {
-				throw new Error("Error fetching photos");
+				throw new Error("Error fetching pokemon");
 			}
 			const data = await response.json();
-			setFetchedPhoto(data[0]);
+			setFetchedPokemon(data);
 		};
 
-		if (!reviewPhoto) fetchPhotos();
-	}, [reviewPhoto]); // eslint-disable-line
-
-	console.log("reviews", reviews);
+		fetchPhotos();
+	}, []); // eslint-disable-line
 
 	useEffect(() => {
 		getRevs();
@@ -53,20 +48,27 @@ const Reviews = () => {
 	return (
 		<div>
 			<HeaderComponent
-				title={"Reviews"}
+				title={
+					fetchedPokemon?.name.charAt(0).toUpperCase() +
+					fetchedPokemon?.name.slice(1).toLowerCase()
+				}
 				redBtnLbl="Back"
 				handleLogout={handleBack}
 			/>
 
 			{/* eslint-disable-next-line */}
 			<img
-				src={reviewPhoto?.photo_url || fetchedPhoto?.photo_url}
-				alt={reviewPhoto?.photo_name || fetchedPhoto?.photo_name}
-				className="w-full h-80 object-contain rounded mb-4"
+				src={fetchedPokemon?.sprites.front_default}
+				alt={fetchedPokemon?.sprites.front_default}
+				className="w-full h-40 object-contain rounded mb-4"
 			/>
 
-			<ReviewList reviews={reviews} getRevs={getRevs} />
-			<ReviewForm id={photoId} onReviewAdded={getRevs} />
+			<ReviewList reviews={reviews} getRevs={getRevs} isPokemon={true} />
+			<ReviewForm
+				id={pokemonId}
+				onReviewAdded={getRevs}
+				isPokemon={true}
+			/>
 		</div>
 	);
 };
